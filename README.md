@@ -1,106 +1,56 @@
-# The GCN Link Prediction Model
+# Thesis repo for GNNs
 
-## 1. GCN as an Encoder: Learning Node Embeddings
+Undergraduate thesis, Department of Computer Science and Engineering, Shahjalal University of Science and Technology (SUST).
 
-The GCN acts as an encoder that takes the graph’s structure and node features and transforms every node into a meaningful vector representation (embedding).
+This repository contains the implementation code for a heterogeneous GNN framework that uses a custom (proposed) loss function  for academic advisor-student matching via link prediction.
 
-It learns from:
+## Repository Structure
 
-- **Node features**: `x`
-- **Graph structure**: `edge_index`
+| File | Description |
+|------|-------------|
+| `CAMOC.ipynb` | CAMOC loss training and evaluation on the SUST academic knowledge graph |
+| `CAMOC_dblp.ipynb` | CAMOC loss evaluation on the DBLP benchmark dataset |
+| `camoc_gnn_pipeline_output.ipynb` | Full pipeline: CAMOC vs BCE comparison across GCN, GraphSAGE, GAT, RGCN, HAN |
+| `loss_function_implementation.ipynb` | Standalone implementation of the CAMOC loss components |
+| `Thesis_dataset_embed.ipynb` | Dataset construction and feature engineering for the SUST-AKG |
+| `embedding.ipynb` | Node embedding generation and visualization |
+| `gcn-link-prediction.ipynb` | Baseline GCN link prediction |
+| `code_with_explanation.ipynb` | Annotated walkthrough of the core pipeline |
 
-The GCN produces embeddings `z` such that:
+## Requirements
 
-- Nodes that _should_ be connected end up **closer** in embedding space
-- Nodes that should _not_ be connected become **farther apart**
+- Python 3.8+
+- PyTorch
+- PyTorch Geometric
+- scikit-learn
+- NumPy
 
-Example embedding after training:
+All notebooks are designed to run on Google Colab with GPU runtime.
 
-```
-z[node] = [0.12, -0.56, 1.87, ...]
-```
+## Usage
 
-In simple terms, the GCN is learning to **understand the graph’s structure and patterns**.
+1. Open any notebook in Google Colab
+2. Set runtime to GPU
+3. Run all cells
 
----
+The SUST-AKG dataset files (`advisors.json`, `students.json`, `courses.json`, `research_areas.json`, `papers.json`) are loaded from the working directory. Upload them to `/content/` when running on Colab.
 
-## 2. Dot-Product Decoder: Predicting Links
+The DBLP notebook (`CAMOC_dblp.ipynb`) downloads the dataset automatically via PyTorch Geometric.
 
-Once node embeddings are learned, link prediction becomes simple:
+## GNN Architectures
 
-**Do two nodes point in the same direction in embedding space?**
+The framework benchmarks five architectures under a unified evaluation protocol:
 
-We compute a score using the dot product:
+- GCN (Kipf and Welling, 2017)
+- GraphSAGE (Hamilton et al., 2017)
+- GAT (Velickovic et al., 2018)
+- RGCN (Schlichtkrull et al., 2018)
+- HAN (Wang et al., 2019)
 
-```
-score = z[A] • z[B]
-```
+## Author
 
-Interpretation:
+Al Amin Hossain, CSE, SUST
 
-- **Higher score** → nodes likely have an edge
-- **Lower score** → nodes are unlikely to connect
+## License
 
-This approach mirrors classic graph embedding methods such as **DeepWalk** and **node2vec**.
-
----
-
-## 3. Training: Teaching the Model to Predict Links
-
-`RandomLinkSplit` prepares:
-
-- **Positive edges** (true edges from the graph)
-- **Negative edges** (non-existing edges the model must reject)
-
-The loss function trains the model to:
-
-- Assign **high scores** to positive edges
-- Assign **low scores** to negative edges
-
-A fun way to think about it:
-
-> The model works like Tinder for nodes.  
-> It learns who should “match” and who shouldn’t.
-
----
-
-## 4. What the Model Learns
-
-By the end of training, the GCN captures:
-
-### Structural patterns
-
-- Nodes with similar neighbors tend to connect
-- Example: In the Cora dataset, papers citing similar papers often cite each other
-
-### Feature similarities
-
-- GCN aggregates feature information over neighbors
-- Nodes with similar content get closer in embedding space
-- Missing edges can be inferred even without direct connections
-
-### Graph semantics
-
-The model uncovers the **hidden rules** behind how the graph was formed.
-
----
-
-## 5. Evaluation
-
-The model is evaluated using:
-
-- Validation edges
-- Test edges
-
-Key metrics:
-
-- **AUC (Area Under ROC Curve)**  
-  Measures how well positive edges are ranked above negative ones
-
-- **AP (Average Precision)**  
-  Focuses on quality of positive predictions
-
-Typical good performance: **AUC ≥ 0.90**  
-This means the model has effectively captured the underlying graph structure.
-
----
+This project is part of an undergraduate thesis. No license is provided.
